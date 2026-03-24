@@ -63,6 +63,11 @@ class JarvisEngine:
             max_history=self.config.get("memory", "max_conversation_history", default=50),
         )
 
+        # Determine GPU backend (auto-detect or from config)
+        gpu_backend = self.config.get("gpu", "backend", default="auto")
+        if gpu_backend == "auto":
+            gpu_backend = self.gpu.get_llama_cpp_backend()
+
         # AI Brain
         self.brain = Brain(
             model_path=self.config.get("ai", "model_path"),
@@ -74,6 +79,7 @@ class JarvisEngine:
             gpu_layers=self.gpu.get_gpu_layers() if self.gpu.is_available
             else self.config.get("ai", "gpu_layers", default=0),
             threads=self.config.get("ai", "threads", default=4),
+            gpu_backend=gpu_backend,
         )
 
         # Voice

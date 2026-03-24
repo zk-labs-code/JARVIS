@@ -54,7 +54,7 @@ JARVIS/
 ## Requirements
 
 - **Python** 3.10+
-- **GPU** (recommended): NVIDIA GPU with CUDA for accelerated LLM inference
+- **GPU** (recommended): NVIDIA (CUDA), AMD (ROCm/OpenCL), or Intel (oneAPI) GPU for accelerated LLM inference
 - **Microphone**: For voice commands
 - **Webcam**: For hand gesture recognition (optional)
 - **OS**: Windows 10/11 or Linux (Ubuntu 20.04+)
@@ -86,12 +86,26 @@ source venv/bin/activate
 # Basic installation
 pip install -r requirements.txt
 
-# For GPU support (NVIDIA CUDA), install llama-cpp-python with CUDA:
-CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python
+# For GPU support, install llama-cpp-python with the backend matching your GPU:
 
-# On Windows with CUDA:
+# NVIDIA (CUDA)
+CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# AMD (ROCm) — requires ROCm toolkit installed
+CMAKE_ARGS="-DGGML_HIPBLAS=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# AMD / Intel / Universal (OpenCL via CLBlast)
+CMAKE_ARGS="-DGGML_CLBLAST=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# Intel (oneAPI / SYCL)
+CMAKE_ARGS="-DGGML_SYCL=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# Vulkan (universal — works on most GPUs)
+CMAKE_ARGS="-DGGML_VULKAN=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# On Windows, use `set` instead of inline env:
 set CMAKE_ARGS=-DGGML_CUDA=on
-pip install llama-cpp-python
+pip install llama-cpp-python --force-reinstall --no-cache-dir
 ```
 
 ### 4. Download AI Models
@@ -197,12 +211,43 @@ Edit `config.yaml` to customize JARVIS:
 
 ## GPU Setup
 
-JARVIS automatically detects and uses your GPU:
+JARVIS automatically detects and uses your GPU (NVIDIA, AMD, or Intel).
+The detection pipeline tries multiple methods in order:
+PyTorch → nvidia-smi / rocm-smi → GPUtil → OpenCL → Vulkan → lspci / WMI.
 
-1. **NVIDIA GPU**: Install [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
-2. Install llama-cpp-python with CUDA support (see Installation step 3)
-3. JARVIS auto-detects GPU and offloads LLM layers for fast inference
-4. Configure `gpu.memory_fraction` in config.yaml to control memory usage
+### NVIDIA (CUDA)
+
+1. Install the [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
+2. Install llama-cpp-python with CUDA (see Installation step 3)
+3. JARVIS auto-detects your GPU and offloads LLM layers
+
+### AMD (ROCm / OpenCL)
+
+1. Install [ROCm](https://rocm.docs.amd.com/) **or** your distro's OpenCL driver
+   - Ubuntu: `sudo apt install rocm-dkms` (ROCm) or `sudo apt install mesa-opencl-icd` (OpenCL)
+   - For Fire Pro / Radeon Pro cards, ROCm or the AMDGPU-PRO OpenCL driver is recommended
+2. Install llama-cpp-python with the matching backend:
+   - ROCm: `CMAKE_ARGS="-DGGML_HIPBLAS=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`
+   - OpenCL: `CMAKE_ARGS="-DGGML_CLBLAST=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`
+3. Verify detection: `rocm-smi` or `clinfo` should list your GPU
+
+### Intel (oneAPI / SYCL)
+
+1. Install [Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit.html)
+2. Install llama-cpp-python with SYCL: `CMAKE_ARGS="-DGGML_SYCL=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`
+
+### Configuration
+
+Edit `config.yaml` under the `gpu:` section:
+
+```yaml
+gpu:
+  prefer_gpu: true
+  memory_fraction: 0.8
+  backend: "auto"   # auto, cuda, rocm, sycl, opencl, vulkan, cpu
+```
+
+Set `backend` to `"auto"` (default) to let JARVIS pick the best backend, or force a specific one.
 
 ## How Self-Learning Works
 

@@ -113,5 +113,12 @@ coding:
 gpu:
   # GPU settings
   prefer_gpu: true
-  cuda_visible_devices: "0"
   memory_fraction: 0.8  # Max GPU memory usage fraction
+  # GPU backend for llama-cpp-python acceleration.
+  # Options: auto, cuda, rocm, sycl, opencl, vulkan, cpu
+  # "auto" detects the best backend for your hardware.
+  backend: "auto"
+  # Vendor-specific device selection (set to "0" for first GPU)
+  cuda_visible_devices: "0"      # NVIDIA (CUDA_VISIBLE_DEVICES)
+  hip_visible_devices: "0"       # AMD    (HIP_VISIBLE_DEVICES)
+  oneapi_device_selector: null    # Intel  (ONEAPI_DEVICE_SELECTOR, e.g. "level_zero:0")

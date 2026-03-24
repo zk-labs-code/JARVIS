@@ -18,6 +18,8 @@ PyQt5>=5.15.0
 # GPU Management
 GPUtil>=1.4.0
 psutil>=5.9.0
+# Optional: AMD/Intel/Universal GPU detection
+# pip install pyopencl  # OpenCL-based GPU detection (AMD, Intel, NVIDIA)
 
 # System Control
 pyautogui>=0.9.54

@@ -53,6 +53,7 @@ class Brain:
         top_p: float = 0.9,
         gpu_layers: int = -1,
         threads: int = 4,
+        gpu_backend: str = "auto",
     ):
         """Initialize the AI Brain.
 
@@ -65,6 +66,8 @@ class Brain:
             top_p: Top-p sampling parameter.
             gpu_layers: Number of layers to offload to GPU (-1 for all).
             threads: Number of CPU threads to use.
+            gpu_backend: GPU backend for llama-cpp-python
+                (auto, cuda, rocm, sycl, opencl, vulkan, cpu).
         """
         self.model_path = model_path
         self.model_file = model_file
@@ -74,6 +77,7 @@ class Brain:
         self.top_p = top_p
         self.gpu_layers = gpu_layers
         self.threads = threads
+        self.gpu_backend = gpu_backend
         self._llm: Any = None
         self._initialized = False
         self._fallback_mode = False
@@ -99,7 +103,10 @@ class Brain:
             from llama_cpp import Llama
 
             logger.info(f"Loading LLM model: {model_file_path}")
-            logger.info(f"GPU layers: {self.gpu_layers}, Threads: {self.threads}")
+            logger.info(
+                f"GPU layers: {self.gpu_layers}, Threads: {self.threads}, "
+                f"Backend: {self.gpu_backend}"
+            )
 
             self._llm = Llama(
                 model_path=str(model_file_path),
@@ -323,5 +330,6 @@ class Brain:
             "fallback_mode": self._fallback_mode,
             "model_path": self.model_path,
             "gpu_layers": self.gpu_layers,
+            "gpu_backend": self.gpu_backend,
             "context_length": self.context_length,
         }
