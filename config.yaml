@@ -1,0 +1,124 @@
+# JARVIS Configuration
+# ====================
+
+general:
+  name: "JARVIS"
+  version: "1.0.0"
+  log_level: "INFO"
+  data_dir: "data"
+  log_dir: "logs"
+
+voice:
+  # Speech recognition settings
+  listener:
+    engine: "vosk"  # "vosk" (offline) or "google" (online fallback)
+    model_path: "data/models/vosk-model-small-en-us-0.15"
+    sample_rate: 16000
+    energy_threshold: 300
+    pause_threshold: 0.8
+    wake_word: "jarvis"
+  # Text-to-speech settings
+  speaker:
+    engine: "pyttsx3"
+    rate: 175
+    volume: 0.9
+    voice_id: null  # null = use system default
+
+gesture:
+  enabled: true
+  camera_index: 0
+  min_detection_confidence: 0.7
+  min_tracking_confidence: 0.5
+  gestures:
+    open_palm: "activate_listening"
+    closed_fist: "stop_listening"
+    thumbs_up: "confirm_action"
+    thumbs_down: "cancel_action"
+    peace_sign: "screenshot"
+    point_up: "scroll_up"
+    point_down: "scroll_down"
+
+ai:
+  # Local LLM settings
+  model_path: "data/models/llm"
+  model_file: null  # Will auto-detect GGUF file in model_path
+  context_length: 4096
+  max_tokens: 2048
+  temperature: 0.7
+  top_p: 0.9
+  gpu_layers: -1  # -1 = offload all layers to GPU
+  threads: 4
+
+memory:
+  # Memory/learning system
+  db_path: "data/memory/jarvis_memory.db"
+  max_conversation_history: 50
+  learning_enabled: true
+
+ui:
+  # Overlay UI settings
+  opacity: 0.85
+  width: 420
+  height: 600
+  position: "top-right"  # top-left, top-right, bottom-left, bottom-right, center
+  theme: "dark"
+  font_size: 13
+  always_on_top: true
+  colors:
+    background: "#1a1a2e"
+    surface: "#16213e"
+    primary: "#0f3460"
+    accent: "#e94560"
+    text: "#eaeaea"
+    text_secondary: "#a0a0a0"
+    success: "#00c853"
+    warning: "#ff9100"
+    error: "#ff1744"
+
+system:
+  # System control settings
+  allow_file_operations: true
+  allow_system_commands: true
+  allow_process_management: true
+  restricted_paths:
+    - "C:\\Windows\\System32"
+    - "/etc"
+    - "/boot"
+  max_file_size_mb: 100
+
+web:
+  # Internet access settings
+  search_engine: "duckduckgo"
+  max_search_results: 5
+  timeout: 15
+  user_agent: "JARVIS-AI-Assistant/1.0"
+  learning:
+    auto_learn: true
+    cache_results: true
+    cache_dir: "data/skills/web_cache"
+
+coding:
+  # Code assistant settings
+  supported_languages:
+    - "python"
+    - "javascript"
+    - "html"
+    - "css"
+    - "bash"
+    - "powershell"
+  auto_format: true
+  sandbox_execution: true
+  max_execution_time: 30  # seconds
+
+gpu:
+  # GPU settings
+  prefer_gpu: true
+  memory_fraction: 0.8  # Max GPU memory usage fraction
+  # GPU backend for llama-cpp-python acceleration.
+  # Options: auto, cuda, rocm, sycl, opencl, vulkan, cpu
+  # "auto" detects the best backend for your hardware.
+  backend: "auto"
+  # Vendor-specific device selection (set to "0" for first GPU)
+  cuda_visible_devices: "0"      # NVIDIA (CUDA_VISIBLE_DEVICES)
+  hip_visible_devices: "0"       # AMD    (HIP_VISIBLE_DEVICES)
+  oneapi_device_selector: null    # Intel  (ONEAPI_DEVICE_SELECTOR, e.g. "level_zero:0")
